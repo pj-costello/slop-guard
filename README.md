@@ -6,11 +6,12 @@ Anti-AI-slop rules, portable lint checks, and a scanner for discovering new patt
 
 AI coding assistants produce predictable anti-patterns: over-abstraction, unnecessary comments, defensive over-engineering, kitchen-sink dependencies, test files shipped to production, and scope creep into untouched files. Left unchecked, these patterns compound into bloated, fragile codebases.
 
-This repo provides three things to fight it:
+This repo provides four things to fight it:
 
 1. **[RULES.md](RULES.md)** -- A living catalog of anti-slop rules with concrete do/don't guidance
-2. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable Python lint checks you can import into any project
-3. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that discovers new patterns weekly
+2. **[PREFERENCES.md](PREFERENCES.md)** -- Defaults for architectural trade-offs (DRY, flat structure, functions over classes, etc.)
+3. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable Python lint checks you can import into any project
+4. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that discovers new patterns weekly
 
 ## Quick start
 
