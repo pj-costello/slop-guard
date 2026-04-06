@@ -54,10 +54,10 @@ and propose additions while keeping the ruleset MECE.
 
 ### Tier 3 — Quarterly deep reads
 
-Only run if today is within the first 7 days of January, April, July, or October.
-Check using Bash: `date +%m-%d` and compare.
+Only run if today is within the first 7 days of the month.
+Check using Bash: `date +%d` and compare (01-07 = run).
 
-If quarterly:
+If monthly:
 - WebSearch `site:arxiv.org AI generated code quality 2026`
 - WebFetch `https://www.qodo.ai/reports/state-of-ai-code-quality/`
 - WebSearch `site:fast.ai vibe coding OR AI code`

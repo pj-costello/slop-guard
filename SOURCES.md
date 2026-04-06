@@ -95,7 +95,7 @@ The slop-scanner checks these sources on a tiered schedule to discover new patte
 | Smithery.ai | smithery.ai | 60% | Community-driven anti-slop skill ecosystem |
 | General web sweep | (various) | varies | Catches sources not in the watchlist |
 
-### Tier 3 — Quarterly deep reads (Jan/Apr/Jul/Oct)
+### Tier 3 — Monthly deep reads (first week of each month)
 
 | Source | URL | SNR | Why |
 |--------|-----|-----|-----|
