@@ -8,10 +8,10 @@ AI coding assistants produce predictable anti-patterns: over-abstraction, unnece
 
 This repo provides four things to fight it:
 
-1. **[RULES.md](RULES.md)** -- 18 anti-slop rules across 4 categories, each with concrete do/don't examples
-2. **[PREFERENCES.md](PREFERENCES.md)** -- 10 architectural decision defaults (DRY, flat structure, typed exceptions, etc.) with caveats for when not to apply them
-3. **[lint/slop_lint.py](lint/slop_lint.py)** -- 4 portable Python lint checks you can import into any project or CI pipeline
-4. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that scans 9 curated sources twice weekly for new patterns
+1. **[RULES.md](RULES.md)** -- Anti-slop rules with concrete do/don't examples, organized by category
+2. **[PREFERENCES.md](PREFERENCES.md)** -- Architectural decision defaults (DRY, flat structure, typed exceptions, etc.) with caveats for when not to apply them
+3. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable Python lint checks you can import into any project or CI pipeline
+4. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that scans curated sources twice weekly for new patterns
 
 ## How it stays current
 
