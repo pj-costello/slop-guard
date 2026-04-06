@@ -75,6 +75,43 @@ A reviewer prompt specifically designed to catch AI slop patterns in pull reques
 
 ---
 
+## Monitoring Sources
+
+The slop-scanner checks these sources on a tiered schedule to discover new patterns.
+
+### Tier 1 — Primary (every weekly scan)
+
+| Source | URL | SNR | Why |
+|--------|-----|-----|-----|
+| Greptile Blog | greptile.com/blog | 95% | Data-driven analysis of 700K+ PRs/month |
+| Simon Willison | simonwillison.net | 80% | Coined "cognitive debt", practical agentic engineering patterns |
+| HN Algolia API | hn.algolia.com/api | 70% | Real-time early signal, structured JSON with score/date filtering |
+
+### Tier 2 — Secondary (every weekly scan, web search)
+
+| Source | URL | SNR | Why |
+|--------|-----|-----|-----|
+| r/ExperiencedDevs | reddit.com/r/ExperiencedDevs | 75% | 321K senior devs, high moderation quality |
+| Smithery.ai | smithery.ai | 60% | Community-driven anti-slop skill ecosystem |
+| General web sweep | (various) | varies | Catches sources not in the watchlist |
+
+### Tier 3 — Quarterly deep reads (Jan/Apr/Jul/Oct)
+
+| Source | URL | SNR | Why |
+|--------|-----|-----|-----|
+| ArXiv | arxiv.org | 90% | Peer-reviewed research, e.g. "An Endless Stream of AI Slop" |
+| Qodo Report | qodo.ai/reports | 90% | Annual report across 1000s of teams |
+| fast.ai | fast.ai | 85% | Jeremy Howard's "dark flow" analysis of vibe coding |
+
+### Sources considered but excluded
+
+- **Pragmatic Engineer** — paywalled, can't fetch content. Signal captured via general sweep when articles get discussed.
+- **r/programming** — 6.8M members but lower SNR than r/ExperiencedDevs. Captured in general sweep.
+- **Twitter/X** — can't reliably scrape. Viral threads get caught by general web search.
+- **SonarQube** — great for CI but doesn't surface *new* patterns.
+
+---
+
 ## Adding Sources
 
 When adding a new rule to RULES.md, add the source here with:
