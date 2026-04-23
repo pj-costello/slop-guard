@@ -1,22 +1,25 @@
 # slop-guard
 
-Anti-AI-slop rules, portable lint checks, decision preferences, and a self-updating scanner.
+Anti-AI-slop rules, portable lint checks, decision preferences, lessons learned, and a self-updating scanner.
 
 ## What is AI slop?
 
 AI coding assistants produce predictable anti-patterns: over-abstraction, unnecessary comments, defensive over-engineering, kitchen-sink dependencies, test files shipped to production, and scope creep into untouched files. Left unchecked, these patterns compound into bloated, fragile codebases.
 
-This repo provides five things to fight it:
+This repo provides six things to fight it:
 
 1. **[RULES.md](RULES.md)** -- Anti-slop rules with concrete do/don't examples, organized by category
 2. **[PREFERENCES.md](PREFERENCES.md)** -- Architectural decision defaults (DRY, flat structure, typed exceptions, etc.) with caveats for when not to apply them
-3. **[TESTING.md](TESTING.md)** -- Reusable testing playbook: layered test patterns, starter templates, and a new-project checklist
-4. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable Python lint checks you can import into any project or CI pipeline
-5. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that scans curated sources twice weekly for new patterns
+3. **[LESSONS.md](LESSONS.md)** -- Techniques proven effective across real sessions; complements RULES.md (what not to do) and PREFERENCES.md (how to decide)
+4. **[TESTING.md](TESTING.md)** -- Reusable testing playbook: layered test patterns, starter templates, and a new-project checklist
+5. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable Python lint checks you can import into any project or CI pipeline
+6. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that scans curated sources twice weekly for new patterns
 
 ## How it stays current
 
-The scanner runs **twice weekly** (Monday + Thursday) across three tiers of curated sources:
+Two complementary pipelines keep the content fresh:
+
+**External scanner** (twice weekly, Mon + Thu) — searches curated web sources for new AI anti-patterns:
 
 | Tier | Sources | Frequency |
 |------|---------|-----------|
@@ -24,7 +27,9 @@ The scanner runs **twice weekly** (Monday + Thursday) across three tiers of cura
 | 2 -- Secondary | r/ExperiencedDevs, Smithery.ai, general web sweep | Every scan |
 | 3 -- Deep reads | ArXiv, Qodo Report, fast.ai | Monthly (first week) |
 
-Every finding passes through a structured distillation pipeline (5 filtering criteria, mandatory do/don't examples, source provenance) and a MECE audit that checks category balance, overlap, and gaps. Nothing is auto-committed -- all proposals require human review.
+**Session distiller** (daily) — scans Claude Code session transcripts for internal learnings: user corrections, bugs found in production, architectural decisions, and techniques that worked. Also audits fix commits to flag any that didn't produce a corresponding lint rule.
+
+Every finding passes through a structured distillation pipeline (filtering criteria, mandatory do/don't examples, source provenance) and a MECE audit that checks category balance, overlap, and gaps. Nothing is auto-committed — all proposals require human review.
 
 See [SOURCES.md](SOURCES.md) for the full watchlist, provenance for every rule, and rationale for source selection.
 
