@@ -1,7 +1,6 @@
 # Sources
 
-Every rule in [RULES.md](RULES.md) traces back to a real-world critique, audit, or incident.
-This file tracks the provenance.
+Every rule in [RULES.md](RULES.md) traces to a real-world critique, audit, or incident. This file tracks the provenance. A source may also list **context only** items (e.g. policy or ethics) that inform narrative or README background but are intentionally not encoded as a universal “do/don’t” rule in RULES.md.
 
 ---
 
@@ -24,7 +23,9 @@ Findings:
 - Empty CSS file, Rails scaffold "Hello World" controller
 - Analytics proxy to bypass ad blockers on a 501(c)(4) nonprofit site
 
-**Rules informed:** No test artifacts in production, No kitchen-sink dependencies, No unoptimized assets, No dead code, Bundle size matters, Review every diff, Don't ship what you don't understand
+**Rules informed by this audit (covered in RULES.md):** No test artifacts in production; No kitchen-sink dependencies; No unoptimized or duplicate assets; No dead code or empty files; Bundle size matters; Review every AI-generated diff; Don't ship what you don't understand; No empty alt on meaningful images; No duplicate document shell or main content in the DOM
+
+**Cited in README / context only (no standalone rule in RULES.md):** Analytics or tracking workarounds that create compliance or policy risk; document those in your own project if relevant.
 
 ### @bradgessler -- "AI slop is cope" response (Apr 3, 2026)
 
@@ -71,7 +72,7 @@ Q&A identifying AI-specific code smells including over-commenting, scope creep, 
 
 A reviewer prompt specifically designed to catch AI slop patterns in pull requests.
 
-**Rules informed:** General review framework
+**Rules informed:** Framing and review process (overlaps *Review every AI-generated diff*; no additional standalone rule in RULES.md)
 
 ---
 
@@ -79,7 +80,7 @@ A reviewer prompt specifically designed to catch AI slop patterns in pull reques
 
 The slop-scanner checks these sources on a tiered schedule to discover new patterns.
 
-### Tier 1 — Primary (every weekly scan)
+### Tier 1 — Primary (each scheduled scan, e.g. weekly or twice weekly)
 
 | Source | URL | SNR | Why |
 |--------|-----|-----|-----|
@@ -87,7 +88,7 @@ The slop-scanner checks these sources on a tiered schedule to discover new patte
 | Simon Willison | simonwillison.net | 80% | Coined "cognitive debt", practical agentic engineering patterns |
 | HN Algolia API | hn.algolia.com/api | 70% | Real-time early signal, structured JSON with score/date filtering |
 
-### Tier 2 — Secondary (every weekly scan, web search)
+### Tier 2 — Secondary (each scheduled scan, web search)
 
 | Source | URL | SNR | Why |
 |--------|-----|-----|-----|

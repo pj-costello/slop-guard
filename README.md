@@ -12,14 +12,16 @@ This repo provides six things to fight it:
 2. **[PREFERENCES.md](PREFERENCES.md)** -- Architectural decision defaults (DRY, flat structure, typed exceptions, etc.) with caveats for when not to apply them
 3. **[LESSONS.md](LESSONS.md)** -- Techniques proven effective across real sessions; complements RULES.md (what not to do) and PREFERENCES.md (how to decide)
 4. **[TESTING.md](TESTING.md)** -- Reusable testing playbook: layered test patterns, starter templates, and a new-project checklist
-5. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable Python lint checks you can import into any project or CI pipeline
-6. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that scans curated sources twice weekly for new patterns
+5. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable **Python** lint checks (stdlib only). [RULES.md](RULES.md) applies to any stack; the bundled linter is a small automated subset, not a full match to every rule.
+6. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that runs the slop-scanner process (phased scan, distillation, MECE audit). **Schedule in your own environment** (e.g. twice weekly Mon + Thu); the repo only ships the skill, not a cron.
 
 ## How it stays current
 
-Two complementary pipelines keep the content fresh:
+**In this repo** you get: versioned [RULES.md](RULES.md) and the scanner skill. **Out of repo** you may add your own automations; nothing here runs on a server unless you wire it up.
 
-**External scanner** (twice weekly, Mon + Thu) — searches curated web sources for new AI anti-patterns:
+Two complementary *conceptual* pipelines keep the content fresh:
+
+**External scanner** (recommended schedule: **twice weekly, Mon + Thu** when using automation) -- searches curated web sources for new AI anti-patterns:
 
 | Tier | Sources | Frequency |
 |------|---------|-----------|
@@ -27,11 +29,16 @@ Two complementary pipelines keep the content fresh:
 | 2 -- Secondary | r/ExperiencedDevs, Smithery.ai, general web sweep | Every scan |
 | 3 -- Deep reads | ArXiv, Qodo Report, fast.ai | Monthly (first week) |
 
-**Session distiller** (daily) — scans Claude Code session transcripts for internal learnings: user corrections, bugs found in production, architectural decisions, and techniques that worked. Also audits fix commits to flag any that didn't produce a corresponding lint rule.
+**Session distiller** (optional, run in *your* Claude Code or CI context if you set it up) -- scans session transcripts for internal learnings: user corrections, production bugs, and techniques that worked. A daily cadence is one option; the implementation is not part of this repository.
 
 Every finding passes through a structured distillation pipeline (filtering criteria, mandatory do/don't examples, source provenance) and a MECE audit that checks category balance, overlap, and gaps. Nothing is auto-committed — all proposals require human review.
 
 See [SOURCES.md](SOURCES.md) for the full watchlist, provenance for every rule, and rationale for source selection.
+
+## Reproducible / pinned consumption
+
+- **Slop-lint and rules in CI:** Point raw URLs at a **tag** or **commit SHA** instead of `main` when you need stable behavior across environments, e.g. `https://raw.githubusercontent.com/pj-costello/slop-guard/v0.1.0/lint/slop_lint.py` after you [create a release](https://github.com/pj-costello/slop-guard/releases) on the commit you want.
+- **Loose / always current:** The examples below use `main` to track the latest rules and lint.
 
 ## Quick start
 
@@ -97,6 +104,8 @@ except Exception:
 Inspired by @Gregorein's viral audit of garryslist.org (2.7M views) which cataloged what 78K lines of AI-generated code looks like in production: 6.42 MB homepage, 169 requests, test files served to visitors, 78 unused controllers, and a rich text editor on a read-only page.
 
 ## Contributing
+
+Run `python3 -m unittest discover -s tests` and `python3 lint/slop_lint.py .` before you push; CI runs the same.
 
 Open a PR to add new rules. Each rule must include:
 - A concrete do/don't example

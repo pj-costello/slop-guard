@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+"""Unit tests for slop_lint (stdlib only, run with: python -m unittest)."""
+import tempfile
+import unittest
+from pathlib import Path
+
+# Import from repo root
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lint"))
+
+import slop_lint  # noqa: E402
+
+
+def _write(root: Path, rel: str, text: str) -> None:
+    p = root / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(text, encoding="utf-8")
+
+
+class TrivialDocstringsTest(unittest.TestCase):
+    def test_flags_short_obvious_docstring(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", '''
+def get_foo():
+    """Get the foo."""
+    return 1
+''')
+            r = slop_lint.check_trivial_docstrings(root)
+            self.assertTrue(any("get_foo" in m for _, __, m in r))
+
+    def test_allows_explanatory_docstring(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", '''
+def get_foo():
+    """
+    Resolves the foo with caching and retries on 429 from upstream.
+    This is the single public entry for callers in other packages.
+    """
+    return 1
+''')
+            r = slop_lint.check_trivial_docstrings(root)
+            self.assertEqual(r, [])
+
+
+class CatchLogReraiseTest(unittest.TestCase):
+    def test_two_line_log_reraise(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", '''
+import logging
+log = logging.getLogger(__name__)
+try:
+    x = 1
+except Exception as e:
+    log.error("fail %s", e)
+    raise
+''')
+            r = slop_lint.check_catch_log_reraise(root)
+            self.assertEqual(len(r), 1, r)
+            self.assertIn("re-raise", r[0][2])
+
+    def test_multiline_log_then_reraise(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", '''
+import logging
+log = logging.getLogger(__name__)
+try:
+    x = 1
+except Exception as e:
+    log.error("a")
+    log.error("b")
+    raise
+''')
+            r = slop_lint.check_catch_log_reraise(root)
+            self.assertEqual(len(r), 1, r)
+
+    def test_no_flag_when_except_does_not_only_log_before_raise(self):
+        """Handler with assignment before raise is not "only log and re-raise"."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", '''
+import logging
+log = logging.getLogger(__name__)
+try:
+    x = 1
+except Exception as e:
+    log.error("a")
+    y = 1
+    raise
+''')
+            r = slop_lint.check_catch_log_reraise(root)
+            self.assertEqual(r, [])
+
+    def test_flags_log_reraise_when_except_block_is_only_log_and_raise(self):
+        """Try/finally is separate; except body [log, raise] still matches."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", '''
+import logging
+log = logging.getLogger(__name__)
+try:
+    x = 1
+except Exception as e:
+    log.error("a")
+    raise
+finally:
+    pass
+''')
+            r = slop_lint.check_catch_log_reraise(root)
+            self.assertEqual(len(r), 1)
+
+    def test_allows_bare_except_reraise_only(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", '''
+try:
+    x = 1
+except Exception:
+    raise
+''')
+            r = slop_lint.check_catch_log_reraise(root)
+            self.assertEqual(r, [])
+
+
+class TestFilesOutsideTestsTest(unittest.TestCase):
+    def test_finds_misplaced_test(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "app/test_foo.py", "x = 1\n")
+            r = slop_lint.check_test_files_outside_tests(root)
+            self.assertTrue(any("test_foo" in f for _, f, _ in r))
+            self.assertTrue(any(s == "ERROR" for s, _, _ in r))
+
+    def test_ignores_tests_dir(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "tests/test_foo.py", "x = 1\n")
+            r = slop_lint.check_test_files_outside_tests(root)
+            self.assertEqual(r, [])
+
+
+class EmptyFilesTest(unittest.TestCase):
+    def test_truly_empty_py(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "empty.py").write_text("", encoding="utf-8")
+            r = slop_lint.check_empty_files(root)
+            self.assertTrue(
+                any("no meaningful" in m.lower() for _, __, m in r),
+                r,
+            )
+
+    def test_allows_init_with_only_imports(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "__init__.py").write_text("from . import x\n", encoding="utf-8")
+            r = slop_lint.check_empty_files(root)
+            self.assertEqual(
+                r,
+                [],
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()
