@@ -37,6 +37,23 @@ def extract_user(data):
     return data.get("user", "unknown")
 ```
 
+### Feature-flag risky experimental features during testing
+
+When building a complex new feature that touches a critical user path, gate it
+behind a flag from the start. This lets you disable it without a revert if it
+destabilizes production, and lets you test it in prod for yourself before exposing
+it to all users.
+
+Remove the flag once the feature is stable and validated.
+
+Distinction from the "No feature flags for non-configurable things" rule in
+RULES.md: that rule covers stable, always-on features. This covers incomplete
+features being tested in production alongside a working baseline.
+
+*Origin: New SI panel feature broke the main review pipeline repeatedly across
+multiple sessions, requiring full reverts. User: "how could i also feature flag
+it so only i experience the test version and i can switch between test and prod?"*
+
 ### Prefer flat file structure (with a size limit)
 
 One directory, one file per responsibility. No `src/`, `lib/`, or nested packages.
@@ -131,6 +148,32 @@ def check_python_syntax():
 For non-trivial work, write the plan first and review it (or have it reviewed)
 before implementing. Catching a design flaw in a plan is 10x cheaper than catching
 it in code review, and 100x cheaper than catching it in production.
+
+### Share status at every pause — don't go silent
+
+Every time work stops — waiting for a permission, finishing a phase, hitting a
+blocker — share a one-sentence update: what just happened, what's next, whether
+anything is blocked. Don't wait for the user to ask.
+
+When NOT to apply: one-line responses to simple questions don't need a status footer.
+
+*Origin: Every session reviewed (21 worktrees, 2026-04-01 to 2026-04-20) showed
+5–15 unprompted "status?" messages. Explicit corrections: "why do you stop running
+without sharing an update?" and "ALWAYS share an update each time you stop working."*
+
+### Execute plans end-to-end without mid-plan check-ins
+
+Once a plan is approved, execute it fully without pausing between steps to ask
+"should I proceed?" Share status as you go, but don't stop and wait for a thumbs-up
+after each step — that forces the user to babysit the execution.
+
+Stop and ask only when you hit a permission wall, discover something materially
+different from what the plan assumed, or reach an irreversible action not covered
+by the original approval.
+
+*Origin: Recurring across sessions; explicit correction: "if you stop executing work
+before the plan is complete for non-permission reasons, immediately send your own
+status then continue without waiting for user input."*
 
 ### Prefer the simplest mechanism that works
 

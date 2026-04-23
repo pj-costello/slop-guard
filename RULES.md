@@ -158,6 +158,25 @@ raise ValueError("Invalid input")
 raise ValueError(f"Could not parse document {doc_id}: expected JSON, got {content_type}")
 ```
 
+### Don't extract string content from Python source via string slicing
+
+Reading a Python source file and slicing out a triple-quoted string produces raw Python source, not the interpreted value. Escape sequences like `\\u2713` and `\\n` appear as literals in the output instead of `✓` and newline.
+
+```python
+# BAD — reads raw source; \\u2713 stays as two chars, not ✓
+with open("sidebar_page.py") as f:
+    src = f.read()
+html = src.split('"""')[1]   # grabs literal \\u2713, \\n, etc.
+
+# GOOD — use Python to evaluate the value
+import ast, textwrap
+value = ast.literal_eval(src[src.index('"""'):].split('"""')[1].join(['"""', '"""']))
+
+# BETTER — don't embed HTML in Python source at all; keep it in a .html file
+```
+
+*Origin: Recurring production bug across multiple sessions — user noted "I've seen you share this finding with double backslashes many times."*
+
 ---
 
 ## Quality over Velocity
@@ -175,3 +194,18 @@ Audit what ships to users. A newsletter site should not be 6.42 MB across 169 re
 ### Don't ship what you don't understand
 
 If you can't explain why a module exists, delete it. If you can't explain what a function does, rewrite it or remove it.
+
+### Don't assert exact counts of AI-generated items in tests
+
+AI outputs are non-deterministic. Asserting that a model returns exactly N items ties tests to one snapshot of one model's behavior, making CI flaky without any real regression.
+
+```python
+# BAD — breaks whenever the model returns 27 or 29 flags instead of 28
+assert len(review_cards) == 28
+
+# GOOD — assert existence and a sanity bound
+assert len(review_cards) >= 1
+assert len(review_cards) <= 100
+```
+
+*Origin: Visual E2E test asserted exactly 28 review cards; user correction: "the agent may return different findings each time it runs since its non deterministic."*
