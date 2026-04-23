@@ -1,0 +1,17 @@
+name: test
+
+on:
+  push:
+    branches: [main, "cursor/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  slop-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run slop_lint on self
+        run: python3 lint/slop_lint.py .
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests -v

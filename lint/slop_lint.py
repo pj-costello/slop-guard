@@ -117,15 +117,54 @@ def check_trivial_docstrings(root_dir, exclude_files=None):
     return results
 
 
+_LOG_ATTRS = {"error", "warning", "warn", "info", "debug", "critical", "exception"}
+
+
+def _is_logger_call_expr(stmt):
+    if not isinstance(stmt, ast.Expr):
+        return False
+    if not isinstance(stmt.value, ast.Call):
+        return False
+    call = stmt.value
+    if isinstance(call.func, ast.Attribute) and call.func.attr in _LOG_ATTRS:
+        return True
+    return False
+
+
+def _is_discardable_string_expr(stmt):
+    """Allow a lone string literal in an except block (e.g. accidental 'docstring')."""
+    if not isinstance(stmt, ast.Expr):
+        return False
+    v = stmt.value
+    if isinstance(v, ast.Constant) and isinstance(v.value, str):
+        return True
+    return False
+
+
+def _is_log_and_reraise_handler(body):
+    """True if body is: [optional str exprs and logger calls...] + raise (nothing else)."""
+    if not body or not isinstance(body[-1], ast.Raise):
+        return False
+    for stmt in body[:-1]:
+        if _is_logger_call_expr(stmt) or _is_discardable_string_expr(stmt):
+            continue
+        return False
+    if len(body) < 2:
+        return False
+    for stmt in body[:-1]:
+        if _is_logger_call_expr(stmt):
+            return True
+    return False
+
+
 def check_catch_log_reraise(root_dir, exclude_files=None):
     """Warn on try/except blocks that only log and re-raise.
 
-    Pattern: except SomeError as e: logger.error(...); raise
+    Pattern: except ...: (optional noise) logger.error(...); [more logs] raise
     This adds no value -- let the exception propagate.
     """
     results = []
     exclude_files = set(exclude_files or ["error_handler.py", "exceptions.py"])
-    log_names = {"error", "warning", "warn", "info", "debug", "critical", "exception"}
 
     for path in _py_files(root_dir):
         if path.name in exclude_files:
@@ -140,29 +179,15 @@ def check_catch_log_reraise(root_dir, exclude_files=None):
                 continue
 
             for handler in node.handlers:
-                body = handler.body
-                if len(body) != 2:
+                if not _is_log_and_reraise_handler(handler.body):
                     continue
-
-                first = body[0]
-                is_log = False
-                if isinstance(first, ast.Expr) and isinstance(first.value, ast.Call):
-                    call = first.value
-                    if isinstance(call.func, ast.Attribute):
-                        if call.func.attr in log_names:
-                            is_log = True
-
-                second = body[1]
-                is_raise = isinstance(second, ast.Raise)
-
-                if is_log and is_raise:
-                    rel = path.relative_to(root_dir)
-                    results.append((
-                        "WARN",
-                        str(rel),
-                        f"Line {handler.lineno}: try/except that only logs and "
-                        f"re-raises adds no value. Let the exception propagate."
-                    ))
+                rel = path.relative_to(root_dir)
+                results.append((
+                    "WARN",
+                    str(rel),
+                    f"Line {handler.lineno}: try/except that only logs and "
+                    f"re-raises adds no value. Let the exception propagate."
+                ))
 
     return results
 

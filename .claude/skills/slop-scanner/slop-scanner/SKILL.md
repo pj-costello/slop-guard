@@ -4,7 +4,8 @@ description: >
   Scan curated high-signal sources for new AI code anti-patterns and propose
   additions to RULES.md. Runs a structured distillation pipeline and MECE audit.
   Use when the user says "scan for slop patterns", "check for new anti-patterns",
-  "update slop guard", or invokes /slop-scanner. Scheduled weekly on Mondays.
+  "update slop guard", or invokes /slop-scanner. Schedule to match the repo: twice
+  weekly (Monday and Thursday), or at least once weekly.
 ---
 
 # Slop Scanner

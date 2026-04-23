@@ -146,6 +146,26 @@ Don't leave scaffold files, empty stylesheets, or unused modules. If you generat
 
 *Origin: Gregorein audit found an empty CSS file and a Rails scaffold "Hello World" controller (157 bytes) in production.*
 
+### No empty alt on meaningful images
+
+If an image is not purely decorative, give it a real `alt` (what a screen reader should hear). `alt=""` is only for ornaments; product shots, article figures, and UI that conveys information need descriptive text. Blank alts on content images is a common AI slop default.
+
+```html
+<!-- BAD — figure carries information but no description -->
+<img src="/editorial-shot.png" alt="">
+
+<!-- GOOD — informative alt, or true decorative + empty with intent -->
+<img src="/process-diagram.png" alt="User upload flow: select file, then confirm.">
+```
+
+*Origin: Gregorein audit found 47 images with empty alt tags.*
+
+### No duplicate document shell or main content in the DOM
+
+Ship one valid document outline: a single `head` with one title/meta set, and don't render the same page content twice in the tree. Duplicates bloat the DOM, confuse screen readers, and complicate styles.
+
+*Origin: Gregorein audit found page content rendered twice in the DOM and duplicate head tags.*
+
 ### Preserve error specificity
 
 Every error message should include concrete context: what was attempted, relevant IDs, the actual error. Generic messages defeat debugging.
