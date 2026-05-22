@@ -49,11 +49,12 @@ Argues that AI coding failures are often not code-generation failures, but conte
 
 Findings:
 - Removed code was reintroduced as compatibility shims after the user had deliberately deleted it.
+- Silent catches hid failures instead of documenting why they were safe to ignore.
 - Generic error messages obscured the failing operation, IDs, and actual parse or content-type error.
 - Python source strings were sliced out of files, causing escaped characters such as `\u2713` and `\n` to ship literally.
 - Tests asserted exact counts for non-deterministic AI output, creating flaky failures without real regressions.
 
-**Rules informed:** Don't re-introduce removed code; Preserve error specificity; Don't extract string content from Python source via string slicing; Don't assert exact counts of AI-generated items in tests
+**Rules informed:** Don't re-introduce removed code; No silent catches without an intentional reason; Preserve error specificity; Don't extract string content from Python source via string slicing; Don't assert exact counts of AI-generated items in tests
 
 ---
 
@@ -98,6 +99,8 @@ A reviewer prompt specifically designed to catch AI slop patterns in pull reques
 
 ## Rule Index
 
+Machine-readable copy: [`rules.json`](rules.json). CI validates `rules.json`, `RULES.md`, and source references stay synchronized.
+
 | Rule | Primary source | Enforcement |
 |------|----------------|-------------|
 | No docstrings on obvious functions | Stack Overflow code-smells Q&A | Automated warning |
@@ -105,7 +108,7 @@ A reviewer prompt specifically designed to catch AI slop patterns in pull reques
 | No over-abstraction | Variant Systems anti-patterns | Manual review |
 | No feature flags for non-configurable things | Stack Overflow code-smells Q&A | Manual review |
 | Terse functional comments only | Stack Overflow code-smells Q&A | Manual review |
-| No speculative logging | Medium defensive-code analysis | Manual review |
+| No speculative logging | Medium defensive-code analysis | Automated warning |
 | Don't touch code outside the task scope | Stack Overflow code-smells Q&A | Manual review |
 | Don't re-introduce removed code | Internal session observations | Manual review |
 | Don't create new files for one-off functions | Variant Systems anti-patterns | Manual review |
@@ -116,8 +119,9 @@ A reviewer prompt specifically designed to catch AI slop patterns in pull reques
 | No dead code or empty files | Gregorein audit | Automated warning for Python files |
 | No empty alt on meaningful images | Gregorein audit | Manual review |
 | No duplicate document shell or main content in the DOM | Gregorein audit | Manual review |
-| Preserve error specificity | Internal session observations | Manual review |
-| Don't extract string content from Python source via string slicing | Internal session observations | Manual review |
+| No silent catches without an intentional reason | Internal session observations | Automated error |
+| Preserve error specificity | Internal session observations | Automated warning |
+| Don't extract string content from Python source via string slicing | Internal session observations | Automated warning |
 | Review every AI-generated diff before committing | Gregorein audit / Jose Casanova prompt | Manual review |
 | Bundle size matters | Gregorein audit / Greptile AI Slopware | Manual review |
 | Don't ship what you don't understand | Gregorein audit | Manual review |

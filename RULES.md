@@ -22,24 +22,6 @@ def get_db():
     return _db
 ```
 
-### No try/except that only logs and re-raises
-
-Catching an exception just to log it and re-raise adds noise and defeats structured error handling. Let exceptions propagate to where they're actually handled.
-
-```python
-# BAD
-try:
-    result = store_review(data)
-except Exception as e:
-    logger.error(f"Failed to store review: {e}")
-    raise
-
-# GOOD
-result = store_review(data)
-```
-
-Exception: Use try/except when you need a specific fallback, need to translate the exception type, or need to add context the handler wouldn't have.
-
 ### No over-abstraction
 
 Don't create class hierarchies, strategy patterns, or factory methods for things that work as plain functions. Three similar lines of code is better than a premature abstraction.
@@ -84,6 +66,28 @@ Comments explain WHY, not WHAT. No section headers, no emoji, no `TODO: Consider
 # Map Python log levels to Cloud Logging severity
 ```
 
+---
+
+## Error Handling & Observability
+
+### No try/except that only logs and re-raises
+
+Catching an exception just to log it and re-raise adds noise and defeats structured error handling. Let exceptions propagate to where they're actually handled.
+
+```python
+# BAD
+try:
+    result = store_review(data)
+except Exception as e:
+    logger.error(f"Failed to store review: {e}")
+    raise
+
+# GOOD
+result = store_review(data)
+```
+
+Exception: Use try/except when you need a specific fallback, need to translate the exception type, or need to add context the handler wouldn't have.
+
 ### No speculative logging
 
 Log errors and state transitions. Don't log routine operations.
@@ -96,6 +100,36 @@ logger.info("Successfully stored review")
 
 # GOOD
 logger.error("review_store_failed", extra={"doc_id": doc_id, "error": str(e)})
+```
+
+### No silent catches without an intentional reason
+
+Do not swallow exceptions with `pass` or `...` unless the handler explains why the failure is safe to ignore. Use `# INTENTIONAL: <reason>` on the handler when silence is deliberate.
+
+```python
+# BAD
+try:
+    cleanup_temp_file(path)
+except FileNotFoundError:
+    pass
+
+# GOOD
+try:
+    cleanup_temp_file(path)
+except FileNotFoundError:  # INTENTIONAL: cleanup is idempotent; file may already be gone
+    pass
+```
+
+### Preserve error specificity
+
+Every error message should include concrete context: what was attempted, relevant IDs, the actual error. Generic messages defeat debugging.
+
+```python
+# BAD
+raise ValueError("Invalid input")
+
+# GOOD
+raise ValueError(f"Could not parse document {doc_id}: expected JSON, got {content_type}")
 ```
 
 ---
@@ -165,18 +199,6 @@ If an image is not purely decorative, give it a real `alt` (what a screen reader
 Ship one valid document outline: a single `head` with one title/meta set, and don't render the same page content twice in the tree. Duplicates bloat the DOM, confuse screen readers, and complicate styles.
 
 *Origin: Gregorein audit found page content rendered twice in the DOM and duplicate head tags.*
-
-### Preserve error specificity
-
-Every error message should include concrete context: what was attempted, relevant IDs, the actual error. Generic messages defeat debugging.
-
-```python
-# BAD
-raise ValueError("Invalid input")
-
-# GOOD
-raise ValueError(f"Could not parse document {doc_id}: expected JSON, got {content_type}")
-```
 
 ### Don't extract string content from Python source via string slicing
 

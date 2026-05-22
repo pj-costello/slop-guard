@@ -241,5 +241,104 @@ class EmptyFilesTest(unittest.TestCase):
             self.assertEqual(r, [])
 
 
+class SourceStringSlicingTest(unittest.TestCase):
+    def test_flags_triple_quote_split(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", """
+src = "x"
+html = src.split('\"\"\"')[1]
+""")
+            r = slop_lint.check_source_string_slicing(root)
+            self.assertEqual(len(r), 1, r)
+
+    def test_allows_normal_split(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", 'parts = "a,b".split(",")\n')
+            r = slop_lint.check_source_string_slicing(root)
+            self.assertEqual(r, [])
+
+
+class GenericErrorMessagesTest(unittest.TestCase):
+    def test_flags_generic_raise_message(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", 'raise ValueError("Invalid input")\n')
+            r = slop_lint.check_generic_error_messages(root)
+            self.assertEqual(len(r), 1, r)
+            self.assertIn("generic error", r[0][2])
+
+    def test_allows_contextual_raise_message(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", 'raise ValueError(f"Could not parse document {doc_id}: expected JSON")\n')
+            r = slop_lint.check_generic_error_messages(root)
+            self.assertEqual(r, [])
+
+
+class SpeculativeLoggingTest(unittest.TestCase):
+    def test_flags_routine_info_log(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", """
+import logging
+log = logging.getLogger(__name__)
+log.info("Entering evaluate_review")
+""")
+            r = slop_lint.check_speculative_logging(root)
+            self.assertEqual(len(r), 1, r)
+
+    def test_allows_state_transition_error_log(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", """
+import logging
+log = logging.getLogger(__name__)
+log.error("review_store_failed", extra={"doc_id": doc_id})
+""")
+            r = slop_lint.check_speculative_logging(root)
+            self.assertEqual(r, [])
+
+
+class SilentCatchesTest(unittest.TestCase):
+    def test_flags_bare_silent_catch(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", """
+try:
+    risky()
+except Exception:
+    pass
+""")
+            r = slop_lint.check_silent_catches(root)
+            self.assertEqual(len(r), 1, r)
+            self.assertEqual(r[0][0], "ERROR")
+
+    def test_allows_intentional_silent_catch(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", """
+try:
+    optional_cleanup()
+except FileNotFoundError:  # INTENTIONAL: cleanup target may already be gone
+    pass
+""")
+            r = slop_lint.check_silent_catches(root)
+            self.assertEqual(r, [])
+
+    def test_allows_non_silent_handler(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root, "a.py", """
+try:
+    risky()
+except Exception as e:
+    raise RuntimeError("Could not run risky operation") from e
+""")
+            r = slop_lint.check_silent_catches(root)
+            self.assertEqual(r, [])
+
+
 if __name__ == "__main__":
     unittest.main()

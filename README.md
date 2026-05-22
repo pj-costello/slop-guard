@@ -6,17 +6,18 @@ Anti-AI-slop rules, portable lint checks, decision preferences, lessons learned,
 
 AI coding assistants produce predictable anti-patterns: over-abstraction, unnecessary comments, defensive over-engineering, kitchen-sink dependencies, test files shipped to production, scope creep into untouched files, and plausible diffs whose requirement context and proof claims are missing. Left unchecked, these patterns compound into bloated, fragile codebases and force reviewers to reconstruct intent from output alone.
 
-This repo provides nine things to fight it:
+This repo provides ten things to fight it:
 
 1. **[RULES.md](RULES.md)** -- Anti-slop rules with concrete do/don't examples, organized by category
-2. **[PREFERENCES.md](PREFERENCES.md)** -- Architectural decision defaults (DRY, flat structure, typed exceptions, etc.) with caveats for when not to apply them
-3. **[LESSONS.md](LESSONS.md)** -- Techniques proven effective across real sessions; complements RULES.md (what not to do) and PREFERENCES.md (how to decide)
-4. **[TESTING.md](TESTING.md)** -- Reusable testing playbook: layered test patterns, starter templates, and a new-project checklist
-5. **[REVIEW_PACKET_TEMPLATE.md](REVIEW_PACKET_TEMPLATE.md)** -- Trace requirement, source authority, assumptions, implementation map, proof claims, and staleness triggers for non-trivial AI-generated diffs
-6. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable **Python** lint checks (stdlib only). [RULES.md](RULES.md) applies to any stack; the bundled linter is a small automated subset, not a full match to every rule.
-7. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that runs the slop-scanner process (phased scan, distillation, MECE audit). **Schedule in your own environment** (e.g. twice weekly Mon + Thu); the repo only ships the skill, not a cron.
-8. **[/thermo-nuclear-code-quality-review](.claude/commands/thermo-nuclear-code-quality-review.md)** -- A comprehensive review command for correctness, security, performance, operability, and maintainability.
-9. **[/deslop](.claude/commands/deslop.md)** -- A focused cleanup command for removing known AI slop from an existing branch, diff, or file set.
+2. **[rules.json](rules.json)** -- Machine-readable rule index used to keep rules, sources, lint coverage, and CI checks synchronized
+3. **[PREFERENCES.md](PREFERENCES.md)** -- Architectural decision defaults (DRY, flat structure, typed exceptions, etc.) with caveats for when not to apply them
+4. **[LESSONS.md](LESSONS.md)** -- Techniques proven effective across real sessions; complements RULES.md (what not to do) and PREFERENCES.md (how to decide)
+5. **[TESTING.md](TESTING.md)** -- Reusable testing playbook: layered test patterns, starter templates, and a new-project checklist
+6. **[REVIEW_PACKET_TEMPLATE.md](REVIEW_PACKET_TEMPLATE.md)** -- Trace requirement, source authority, assumptions, implementation map, proof claims, and staleness triggers for non-trivial AI-generated diffs
+7. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable **Python** lint checks (stdlib only). [RULES.md](RULES.md) applies to any stack; the bundled linter is a small automated subset, not a full match to every rule.
+8. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that runs the slop-scanner process (phased scan, distillation, MECE audit). **Schedule in your own environment** (e.g. twice weekly Mon + Thu); the repo only ships the skill, not a cron.
+9. **[/thermo-nuclear-code-quality-review](.claude/commands/thermo-nuclear-code-quality-review.md)** -- A comprehensive review command for correctness, security, performance, operability, and maintainability.
+10. **[/deslop](.claude/commands/deslop.md)** -- A focused cleanup command for removing known AI slop from an existing branch, diff, or file set.
 
 ## MECE review system
 
@@ -34,7 +35,7 @@ This keeps the system MECE: slop guard defines known AI slop, the review packet 
 
 ## How it stays current
 
-**In this repo** you get: versioned [RULES.md](RULES.md) and the scanner skill. **Out of repo** you may add your own automations; nothing here runs on a server unless you wire it up.
+**In this repo** you get: versioned rules, machine-readable index, lint checks, review/cleanup commands, and the scanner skill. **Out of repo** you may add your own automations; nothing here runs on a server unless you wire it up.
 
 Two complementary *conceptual* pipelines keep the content fresh:
 
@@ -68,6 +69,16 @@ Reference `RULES.md` in your project's `CLAUDE.md`, `.cursorrules`, or equivalen
 **Decision preferences**: See https://github.com/pj-costello/slop-guard/blob/main/PREFERENCES.md
 ```
 
+### Validate the rule index
+
+Run the rule/source/index consistency check before changing `RULES.md`, `SOURCES.md`, or `rules.json`:
+
+```bash
+python3 scripts/validate_rule_index.py
+```
+
+CI runs this check to ensure every `RULES.md` heading is represented in `rules.json` and referenced in `SOURCES.md`.
+
 ### Use the lint checks
 
 Copy `lint/slop_lint.py` into your project, or run it standalone:
@@ -87,11 +98,15 @@ for severity, filepath, message in results:
 ```
 
 Checks included:
+- **Python syntax validation** (ERROR) -- flags files that cannot be parsed as UTF-8 Python
+- **Silent catches** (ERROR) -- flags `except: pass` / `except: ...` without `# INTENTIONAL: <reason>`
+- **Test files outside test directories** (ERROR) -- flags test artifacts in production paths
 - **Trivial docstrings** (WARN) -- flags docstrings that just restate the function name
 - **Catch-log-reraise** (WARN) -- flags try/except that only logs and re-raises
-- **Test files outside test directories** (ERROR) -- flags test artifacts in production paths
-- **Python syntax validation** (ERROR) -- flags files that cannot be parsed as UTF-8 Python
 - **Empty files** (WARN) -- flags Python files with no meaningful code
+- **Source-string slicing** (WARN) -- flags triple-quote string slicing that extracts raw Python source
+- **Generic error messages** (WARN) -- flags low-context messages such as `Invalid input`
+- **Speculative logging** (WARN) -- flags routine `info`/`debug` narration such as `Entering ...`
 
 ### Rule coverage matrix
 
@@ -99,10 +114,10 @@ The bundled linter intentionally covers only portable, low-false-positive checks
 
 | Enforcement | Rules |
 |-------------|-------|
-| Automated ERROR | Python syntax validation; test files outside test directories |
-| Automated WARN | trivial docstrings; catch-log-reraise; Python files with no meaningful code |
+| Automated ERROR | Python syntax validation; silent catches; test files outside test directories |
+| Automated WARN | trivial docstrings; catch-log-reraise; Python files with no meaningful code; source-string slicing; generic error messages; speculative logging |
 | Review packet | Context & Proof rules: requirement traceability, source authority, proof matching, staleness |
-| Manual review | architecture, scope, dependency, asset, accessibility, DOM, logging specificity, and quality-over-velocity rules |
+| Manual review | architecture, scope, dependency, asset, accessibility, DOM, and quality-over-velocity rules |
 
 ### Use the scanner
 
@@ -142,7 +157,7 @@ Inspired by @Gregorein's viral audit of garryslist.org (2.7M views) which catalo
 
 ## Contributing
 
-Run `python3 -m unittest discover -s tests` and `python3 lint/slop_lint.py .` before you push; CI runs the same.
+Run `python3 scripts/validate_rule_index.py`, `python3 -m unittest discover -s tests`, and `python3 lint/slop_lint.py .` before you push; CI runs the same.
 
 Open a PR to add new rules. Each rule must include:
 - A concrete do/don't example

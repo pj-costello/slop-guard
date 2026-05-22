@@ -77,7 +77,7 @@ FREQUENCY: [single observation / multiple independent / research-backed]
 EXAMPLE:
   BAD: [concrete code snippet, 2-5 lines]
   GOOD: [concrete fix, 2-5 lines]
-CATEGORY: [Code Bloat | Scope Creep | Production Hygiene | Quality over Velocity | Context & Proof | NEW: ___]
+CATEGORY: [Code Bloat | Error Handling & Observability | Scope Creep | Production Hygiene | Quality over Velocity | Context & Proof | NEW: ___]
 EXISTING OVERLAP: [which existing rule(s) it overlaps, or "none"]
 VERDICT: [ADD / MERGE with rule "X" / SKIP]
 RATIONALE: [why]
