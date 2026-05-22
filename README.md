@@ -1,12 +1,12 @@
 # slop-guard
 
-Anti-AI-slop rules, portable lint checks, decision preferences, lessons learned, and a self-updating scanner.
+Anti-AI-slop rules, portable lint checks, decision preferences, lessons learned, review workflows, and a self-updating scanner.
 
 ## What is AI slop?
 
 AI coding assistants produce predictable anti-patterns: over-abstraction, unnecessary comments, defensive over-engineering, kitchen-sink dependencies, test files shipped to production, scope creep into untouched files, and plausible diffs whose requirement context and proof claims are missing. Left unchecked, these patterns compound into bloated, fragile codebases and force reviewers to reconstruct intent from output alone.
 
-This repo provides seven things to fight it:
+This repo provides eight things to fight it:
 
 1. **[RULES.md](RULES.md)** -- Anti-slop rules with concrete do/don't examples, organized by category
 2. **[PREFERENCES.md](PREFERENCES.md)** -- Architectural decision defaults (DRY, flat structure, typed exceptions, etc.) with caveats for when not to apply them
@@ -15,6 +15,20 @@ This repo provides seven things to fight it:
 5. **[REVIEW_PACKET_TEMPLATE.md](REVIEW_PACKET_TEMPLATE.md)** -- Trace requirement, source authority, assumptions, implementation map, proof claims, and staleness triggers for non-trivial AI-generated diffs
 6. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable **Python** lint checks (stdlib only). [RULES.md](RULES.md) applies to any stack; the bundled linter is a small automated subset, not a full match to every rule.
 7. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that runs the slop-scanner process (phased scan, distillation, MECE audit). **Schedule in your own environment** (e.g. twice weekly Mon + Thu); the repo only ships the skill, not a cron.
+8. **[/thermo-nuclear-code-quality-review](.claude/commands/thermo-nuclear-code-quality-review.md)** -- A comprehensive review command for correctness, security, performance, operability, and maintainability.
+
+## MECE review system
+
+Use the tools together, but keep their responsibilities separate:
+
+| Layer | Owns | Does not own | Primary artifact |
+|-------|------|--------------|------------------|
+| Slop Guard rules | AI-specific anti-patterns and generated-code failure modes | Full codebase architecture review | `RULES.md`, `lint/slop_lint.py` |
+| Review packet | Requirement/source/proof/staleness traceability for a change | Finding new code-quality issues | `REVIEW_PACKET_TEMPLATE.md` |
+| Thermo-nuclear review | Comprehensive engineering review of a branch or diff | Maintaining the anti-slop rule catalog | `.claude/commands/thermo-nuclear-code-quality-review.md` |
+| Slop scanner | Discovering and proposing new anti-slop rules from sources | Reviewing a specific PR's correctness | `.claude/skills/slop-scanner/` |
+
+This keeps the system MECE: slop guard prevents known AI slop, the review packet preserves context and proof, thermo-nuclear review audits the actual change, and the scanner evolves the rule catalog.
 
 ## How it stays current
 
@@ -30,7 +44,7 @@ Two complementary *conceptual* pipelines keep the content fresh:
 | 2 -- Secondary | r/ExperiencedDevs, Smithery.ai, general web sweep | Every scan |
 | 3 -- Deep reads | ArXiv, Qodo Report, fast.ai | Monthly (first week) |
 
-**Session distiller** (optional, run in *your* Claude Code or CI context if you set it up) -- scans session transcripts for internal learnings: user corrections, production bugs, and techniques that worked. A daily cadence is one option; the implementation is not part of this repository.
+**Session distiller** (manual or optional automation, not shipped in this repo) -- scans session transcripts for internal learnings: user corrections, production bugs, and techniques that worked. A daily cadence is one option; the implementation is not part of this repository.
 
 Every finding passes through a structured distillation pipeline (filtering criteria, mandatory do/don't examples, source provenance) and a MECE audit that checks category balance, overlap, and gaps. Nothing is auto-committed — all proposals require human review.
 
@@ -73,8 +87,20 @@ for severity, filepath, message in results:
 Checks included:
 - **Trivial docstrings** (WARN) -- flags docstrings that just restate the function name
 - **Catch-log-reraise** (WARN) -- flags try/except that only logs and re-raises
-- **Test files outside tests/** (ERROR) -- flags test artifacts in production paths
-- **Empty files** (WARN) -- flags files with no meaningful code
+- **Test files outside test directories** (ERROR) -- flags test artifacts in production paths
+- **Python syntax validation** (ERROR) -- flags files that cannot be parsed as UTF-8 Python
+- **Empty files** (WARN) -- flags Python files with no meaningful code
+
+### Rule coverage matrix
+
+The bundled linter intentionally covers only portable, low-false-positive checks. Use `SOURCES.md` for the full rule/source/enforcement index.
+
+| Enforcement | Rules |
+|-------------|-------|
+| Automated ERROR | Python syntax validation; test files outside test directories |
+| Automated WARN | trivial docstrings; catch-log-reraise; Python files with no meaningful code |
+| Review packet | Context & Proof rules: requirement traceability, source authority, proof matching, staleness |
+| Manual review | architecture, scope, dependency, asset, accessibility, DOM, logging specificity, and quality-over-velocity rules |
 
 ### Use the scanner
 
@@ -100,8 +126,8 @@ try:
     slop = importlib.util.module_from_spec(spec); spec.loader.exec_module(slop)
     os.unlink(tmp.name)
     # Now use: slop.check_trivial_docstrings(root), slop.check_catch_log_reraise(root), etc.
-except Exception:
-    pass  # Graceful fallback -- skip slop checks if network unavailable
+except Exception as e:
+    print(f"Slop Guard remote fetch skipped: {e}")  # Optional remote checks unavailable.
 ```
 
 ## Origins
@@ -114,6 +140,6 @@ Run `python3 -m unittest discover -s tests` and `python3 lint/slop_lint.py .` be
 
 Open a PR to add new rules. Each rule must include:
 - A concrete do/don't example
-- The origin (link to the critique, incident, or thread that motivated it)
+- The origin (external link or dated internal incident source that motivated it)
 
 Rules must be actionable and specific. Vague platitudes like "write clean code" don't belong here.

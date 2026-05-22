@@ -288,19 +288,22 @@ artifacts with configurable retention.
 For pure functions with complex logic (text search, matching, scheduling).
 Use the project's native test framework (vitest, unittest, pytest).
 
-### Pattern: Dynamic import to avoid heavy dependencies
+### Pattern: Extract pure logic behind dependency-light imports
 
-If your function lives in a file with heavy imports (Flask, Supabase client),
-extract just the function body for testing without loading the framework.
+If a function lives in a file with heavy imports (Flask, Supabase client), move the
+pure logic into a small importable module instead of slicing source text or using
+`exec()`. Source slicing bypasses Python's normal parsing rules and conflicts with
+`RULES.md` guidance against extracting content from Python source strings.
 
 ```python
-# Load only the functions we need, not the whole module
-with open("api_endpoint.py") as f:
-    source = f.read()
-# Extract function definitions via exec()
-namespace = {}
-exec(source_subset, namespace)
-build_index_map = namespace["_build_full_text_and_index_map"]
+# endpoint.py -- framework boundary stays thin
+from review_logic import build_index_map
+
+# tests/test_review_logic.py -- import the pure function directly
+from review_logic import build_index_map
+
+def test_build_index_map():
+    assert build_index_map(["a", "b"]) == {"a": 0, "b": 1}
 ```
 
 ---

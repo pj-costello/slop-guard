@@ -60,7 +60,7 @@ def evaluate(error_type, fix_type, fix_proposal) -> dict:
 
 ### No feature flags for non-configurable things
 
-Only use env vars / config for values that genuinely differ between environments. If a feature is always on, it's just code.
+Only use env vars / config for values that genuinely differ between environments. If a feature is always on, it's just code. For risky experimental features, use the separate feature-flag preference in `PREFERENCES.md` and remove the flag after validation.
 
 ```python
 # BAD
@@ -188,9 +188,8 @@ with open("sidebar_page.py") as f:
     src = f.read()
 html = src.split('"""')[1]   # grabs literal \\u2713, \\n, etc.
 
-# GOOD — use Python to evaluate the value
-import ast, textwrap
-value = ast.literal_eval(src[src.index('"""'):].split('"""')[1].join(['"""', '"""']))
+# GOOD — import the value through Python, so escapes are interpreted
+from sidebar_page import HTML
 
 # BETTER — don't embed HTML in Python source at all; keep it in a .html file
 ```

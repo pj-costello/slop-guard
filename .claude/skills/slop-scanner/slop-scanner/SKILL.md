@@ -16,8 +16,10 @@ and propose additions while keeping the ruleset MECE.
 
 ## Phase 1: Read Current State
 
-1. Fetch the current RULES.md from https://raw.githubusercontent.com/pj-costello/slop-guard/main/RULES.md
-2. Fetch the current SOURCES.md from https://raw.githubusercontent.com/pj-costello/slop-guard/main/SOURCES.md
+1. Read local `RULES.md` and `SOURCES.md` from the current repo checkout.
+2. If either file is unavailable locally, fetch the fallback copies from:
+   - https://raw.githubusercontent.com/pj-costello/slop-guard/main/RULES.md
+   - https://raw.githubusercontent.com/pj-costello/slop-guard/main/SOURCES.md
 3. Count rules per category. Note these counts for the MECE audit later.
 
 ## Phase 2: Scan Curated Sources
@@ -53,12 +55,12 @@ and propose additions while keeping the ruleset MECE.
 - WebSearch `"AI code anti-pattern" OR "AI code slop" OR "LLM code quality" -site:reddit.com` (last 7 days)
 - WebSearch `"AI generated code" problems quality 2026`
 
-### Tier 3 — Quarterly deep reads
+### Tier 3 — Monthly deep reads
 
 Only run if today is within the first 7 days of the month.
 Check using Bash: `date +%d` and compare (01-07 = run).
 
-If monthly:
+When the monthly window is active:
 - WebSearch `site:arxiv.org AI generated code quality 2026`
 - WebFetch `https://www.qodo.ai/reports/state-of-ai-code-quality/`
 - WebSearch `site:fast.ai vibe coding OR AI code`
@@ -145,7 +147,7 @@ Produce this exact structure:
 - Sources checked: [N]
 - Findings before filtering: [N]
 - Proposals after filtering: [N ADD + N MERGE]
-- Tier 3 quarterly scan: [yes/no]
+- Tier 3 monthly scan: [yes/no]
 
 ## Proposals
 
@@ -169,9 +171,9 @@ Produce this exact structure:
 | r/ExperiencedDevs | 2 | searched | N |
 | Smithery.ai | 2 | searched | N |
 | General sweep | 2 | searched | N |
-| ArXiv | 3 | skipped (not quarterly) | - |
-| Qodo | 3 | skipped (not quarterly) | - |
-| fast.ai | 3 | skipped (not quarterly) | - |
+| ArXiv | 3 | skipped (not monthly window) | - |
+| Qodo | 3 | skipped (not monthly window) | - |
+| fast.ai | 3 | skipped (not monthly window) | - |
 ```
 
 ## Critical Constraints

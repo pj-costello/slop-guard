@@ -43,6 +43,18 @@ Argues that AI coding failures are often not code-generation failures, but conte
 
 **Rules informed:** No orphan diffs; Match the proof to the claim; Keep context bundles scoped and authoritative; Record staleness triggers; Escalate frame mismatches before coding
 
+### Internal session observations -- recurring agent mistakes (Apr-May 2026)
+
+**Source:** User corrections and production debugging sessions captured in this repository's rule history. These are not public URLs, but they are real incidents that motivated durable guardrails.
+
+Findings:
+- Removed code was reintroduced as compatibility shims after the user had deliberately deleted it.
+- Generic error messages obscured the failing operation, IDs, and actual parse or content-type error.
+- Python source strings were sliced out of files, causing escaped characters such as `\u2713` and `\n` to ship literally.
+- Tests asserted exact counts for non-deterministic AI output, creating flaky failures without real regressions.
+
+**Rules informed:** Don't re-introduce removed code; Preserve error specificity; Don't extract string content from Python source via string slicing; Don't assert exact counts of AI-generated items in tests
+
 ---
 
 ## Secondary Sources
@@ -81,6 +93,36 @@ Q&A identifying AI-specific code smells including over-commenting, scope creep, 
 A reviewer prompt specifically designed to catch AI slop patterns in pull requests.
 
 **Rules informed:** Framing and review process (overlaps *Review every AI-generated diff*; no additional standalone rule in RULES.md)
+
+---
+
+## Rule Index
+
+| Rule | Primary source | Enforcement |
+|------|----------------|-------------|
+| No docstrings on obvious functions | Stack Overflow code-smells Q&A | Automated warning |
+| No try/except that only logs and re-raises | Medium defensive-code analysis | Automated warning |
+| No over-abstraction | Variant Systems anti-patterns | Manual review |
+| No feature flags for non-configurable things | Stack Overflow code-smells Q&A | Manual review |
+| Terse functional comments only | Stack Overflow code-smells Q&A | Manual review |
+| No speculative logging | Medium defensive-code analysis | Manual review |
+| Don't touch code outside the task scope | Stack Overflow code-smells Q&A | Manual review |
+| Don't re-introduce removed code | Internal session observations | Manual review |
+| Don't create new files for one-off functions | Variant Systems anti-patterns | Manual review |
+| LOC is not a metric of progress | Greptile AI Slopware | Manual review |
+| No test artifacts in production paths | Gregorein audit | Automated error |
+| No kitchen-sink dependencies | Gregorein audit | Manual review |
+| No unoptimized or duplicate assets | Gregorein audit | Manual review |
+| No dead code or empty files | Gregorein audit | Automated warning for Python files |
+| No empty alt on meaningful images | Gregorein audit | Manual review |
+| No duplicate document shell or main content in the DOM | Gregorein audit | Manual review |
+| Preserve error specificity | Internal session observations | Manual review |
+| Don't extract string content from Python source via string slicing | Internal session observations | Manual review |
+| Review every AI-generated diff before committing | Gregorein audit / Jose Casanova prompt | Manual review |
+| Bundle size matters | Gregorein audit / Greptile AI Slopware | Manual review |
+| Don't ship what you don't understand | Gregorein audit | Manual review |
+| Don't assert exact counts of AI-generated items in tests | Internal session observations | Manual review |
+| Context & Proof rules | Dhasan Dev software-factory-trap article | Review packet |
 
 ---
 
@@ -124,6 +166,6 @@ The slop-scanner checks these sources on a tiered schedule to discover new patte
 ## Adding Sources
 
 When adding a new rule to RULES.md, add the source here with:
-- URL and date
+- URL and date for public sources, or dated internal incident source for session-derived rules
 - Brief summary of the finding
 - Which rules it informed
