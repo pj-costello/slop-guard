@@ -35,6 +35,14 @@ Argued that "AI slop" criticism is cope -- AI just optimizes what you tell it. T
 
 **Rules informed:** Framing of the entire ruleset -- tell AI what NOT to do
 
+### Dhasan Dev -- "software factory trap" article (May 22, 2026)
+
+**Thread / article link:** https://x.com/dhasandev/status/2057519809017897061
+
+Argues that AI coding failures are often not code-generation failures, but context and proof failures: agents produce plausible diffs from only the executable surface of the system, while the requirement, source authority, assumptions, correctness argument, and staleness rules remain implicit. Highlights the "proof trap," where a factory can generate evidence for the wrong claim, such as backend contracts passing while the end-to-end user outcome remains unproven.
+
+**Rules informed:** No orphan diffs; Match the proof to the claim; Keep context bundles scoped and authoritative; Record staleness triggers; Escalate frame mismatches before coding
+
 ---
 
 ## Secondary Sources

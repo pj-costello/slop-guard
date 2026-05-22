@@ -229,3 +229,82 @@ assert len(review_cards) <= 100
 ```
 
 *Origin: Visual E2E test asserted exactly 28 review cards; user correction: "the agent may return different findings each time it runs since its non deterministic."*
+
+---
+
+## Context & Proof
+
+### No orphan diffs
+
+Every non-trivial AI-generated change must ship with a review packet that ties the diff back to the larger object behind it: requirement, authoritative sources, assumptions, implementation mapping, proof claims, and staleness triggers. A reviewer should not have to reconstruct why the code exists from the diff alone.
+
+```markdown
+# BAD
+Changed 7 files and added tests.
+
+# GOOD
+Requirement: R17 checkout should reject expired promo codes before payment intent creation.
+Sources: PRD v3 section 4.2; checkout_api.md#promo-validation.
+Assumptions: Promo expiration is evaluated in UTC.
+Implementation: `validate_promo` now runs before `create_payment_intent`.
+Proof: unit test for expired code; integration test verifies no payment intent is created.
+Stale if: PRD v3 section 4.2 or checkout API promo contract changes.
+```
+
+### Match the proof to the claim
+
+A passing check only proves the claim it actually exercises. Do not use backend unit tests to claim a user journey works, screenshots to claim durable state exists, or a 200 response to claim product intent is satisfied.
+
+```markdown
+# BAD
+Claim: Users can complete onboarding.
+Evidence: `POST /api/onboarding` returns 200.
+
+# GOOD
+Claim: Users can complete onboarding.
+Evidence: E2E creates an account, completes the onboarding screens, verifies persisted profile state, and confirms the next-session resume path.
+```
+
+### Keep context bundles scoped and authoritative
+
+More context is not automatically better. Before implementation, list the small set of admitted sources, mark which source wins on conflicts, and ignore stale or unauthoritative discussion unless it is promoted into the source set.
+
+```markdown
+# BAD
+Context used: repo search, old Slack thread, two planning docs, README, and traces.
+
+# GOOD
+Authoritative sources:
+1. Linear ENG-482 acceptance criteria (owns behavior)
+2. `docs/billing-contract.md` (owns API contract)
+3. `tests/billing/e2e.test.ts` (owns current proof surface)
+
+Ignored: 2025 Slack brainstorm; superseded by ENG-482.
+```
+
+### Record staleness triggers
+
+If the work depends on a requirement, contract, design decision, schema, or external behavior, record what would invalidate the result. When an admitted source changes materially, re-check the impacted work instead of patching around stale assumptions.
+
+```markdown
+# BAD
+Assumption: The webhook payload always includes `customer.email`.
+
+# GOOD
+Assumption: The webhook payload includes `customer.email` because Stripe event contract 2026-04 says it is required.
+Stale if: Stripe API version changes, webhook schema changes, or billing switches to customer IDs as the primary identity.
+```
+
+### Escalate frame mismatches before coding
+
+Do not write code when the requirement conflicts with an architecture boundary, ownership rule, product promise, or existing source of authority. Surface the mismatch and propose the smallest decision needed before implementing.
+
+```markdown
+# BAD
+Requirement says "sync invoices in the browser", so add Stripe secret-key calls to the frontend.
+
+# GOOD
+Escalation: Browser invoice sync conflicts with secret-key boundary. Need decision: move sync to backend job, or change requirement to client-safe invoice preview.
+```
+
+*Origin: Dhasan Dev article on the software factory trap: agents produce syntactically correct but semantically incomplete work when requirement context, source authority, proof obligations, and staleness are not encoded in the workflow.*

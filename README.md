@@ -4,16 +4,17 @@ Anti-AI-slop rules, portable lint checks, decision preferences, lessons learned,
 
 ## What is AI slop?
 
-AI coding assistants produce predictable anti-patterns: over-abstraction, unnecessary comments, defensive over-engineering, kitchen-sink dependencies, test files shipped to production, and scope creep into untouched files. Left unchecked, these patterns compound into bloated, fragile codebases.
+AI coding assistants produce predictable anti-patterns: over-abstraction, unnecessary comments, defensive over-engineering, kitchen-sink dependencies, test files shipped to production, scope creep into untouched files, and plausible diffs whose requirement context and proof claims are missing. Left unchecked, these patterns compound into bloated, fragile codebases and force reviewers to reconstruct intent from output alone.
 
-This repo provides six things to fight it:
+This repo provides seven things to fight it:
 
 1. **[RULES.md](RULES.md)** -- Anti-slop rules with concrete do/don't examples, organized by category
 2. **[PREFERENCES.md](PREFERENCES.md)** -- Architectural decision defaults (DRY, flat structure, typed exceptions, etc.) with caveats for when not to apply them
 3. **[LESSONS.md](LESSONS.md)** -- Techniques proven effective across real sessions; complements RULES.md (what not to do) and PREFERENCES.md (how to decide)
 4. **[TESTING.md](TESTING.md)** -- Reusable testing playbook: layered test patterns, starter templates, and a new-project checklist
-5. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable **Python** lint checks (stdlib only). [RULES.md](RULES.md) applies to any stack; the bundled linter is a small automated subset, not a full match to every rule.
-6. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that runs the slop-scanner process (phased scan, distillation, MECE audit). **Schedule in your own environment** (e.g. twice weekly Mon + Thu); the repo only ships the skill, not a cron.
+5. **[REVIEW_PACKET_TEMPLATE.md](REVIEW_PACKET_TEMPLATE.md)** -- Trace requirement, source authority, assumptions, implementation map, proof claims, and staleness triggers for non-trivial AI-generated diffs
+6. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable **Python** lint checks (stdlib only). [RULES.md](RULES.md) applies to any stack; the bundled linter is a small automated subset, not a full match to every rule.
+7. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that runs the slop-scanner process (phased scan, distillation, MECE audit). **Schedule in your own environment** (e.g. twice weekly Mon + Thu); the repo only ships the skill, not a cron.
 
 ## How it stays current
 
@@ -78,6 +79,10 @@ Checks included:
 ### Use the scanner
 
 If you use Claude Code, the `/slop-scanner` skill searches curated sources for new AI code criticism and proposes additions to RULES.md.
+
+### Use the review packet
+
+For non-trivial AI-generated changes, copy [REVIEW_PACKET_TEMPLATE.md](REVIEW_PACKET_TEMPLATE.md) into your PR description or task handoff. The packet prevents review-by-reconstruction by making the requirement, admitted sources, assumptions, proof claims, and staleness triggers explicit.
 
 ### Fetch at lint time (auto-updating)
 

@@ -74,7 +74,7 @@ FREQUENCY: [single observation / multiple independent / research-backed]
 EXAMPLE:
   BAD: [concrete code snippet, 2-5 lines]
   GOOD: [concrete fix, 2-5 lines]
-CATEGORY: [Code Bloat | Scope Creep | Production Hygiene | Quality over Velocity | NEW: ___]
+CATEGORY: [Code Bloat | Scope Creep | Production Hygiene | Quality over Velocity | Context & Proof | NEW: ___]
 EXISTING OVERLAP: [which existing rule(s) it overlaps, or "none"]
 VERDICT: [ADD / MERGE with rule "X" / SKIP]
 RATIONALE: [why]
@@ -84,7 +84,7 @@ RATIONALE: [why]
 1. **Concrete** — describes a specific code pattern, not a vague complaint
 2. **Not duplicate** — not already covered by an existing rule in RULES.md
 3. **Has source** — links to a real, accessible URL
-4. **Has example** — includes a do/don't code snippet
+4. **Has example** — includes a do/don't code snippet or workflow artifact snippet
 5. **Reproducible** — observed by 2+ people OR well-documented by one credible source
 
 If a finding fails ANY criterion, set VERDICT to SKIP with the reason.
@@ -128,6 +128,7 @@ Read the full RULES.md (including any proposed additions from Phase 4) and produ
   - Performance (N+1 queries, unoptimized assets)
   - Testing (test quality, not just test location)
   - Documentation (over-documenting vs under-documenting)
+  - Context & Proof (source authority, requirement traceability, proof/claim mismatch, stale assumptions)
 - Flag gaps as "potential future categories" — don't create rules for them unless a source supports it.
 
 **Consolidation Opportunities:**
