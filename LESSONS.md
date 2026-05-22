@@ -4,12 +4,13 @@ Living catalog of techniques, approaches, and patterns that have proven effectiv
 across Claude Code sessions. Complements RULES.md (what NOT to do) and
 PREFERENCES.md (how to make decisions).
 
-Updated by the lessons-distiller scheduled task. All entries trace to real session
-observations — nothing is invented.
+Manually curated from real session observations. If you build a lessons-distiller
+automation in your own environment, its proposals should still be human-reviewed
+before landing here — nothing is invented.
 
 ---
 
-<!-- Entries will be added below as the distiller proposes and human reviews them. -->
+<!-- Add entries below as humans review session-derived lessons. -->
 <!-- Categories will emerge from evidence after 10-15 entries accumulate. -->
 
 ---

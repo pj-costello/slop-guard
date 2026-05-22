@@ -12,12 +12,15 @@ description: >
 
 You maintain the slop-guard repo's living catalog of AI code anti-patterns.
 Your job: find new patterns from curated sources, distill them rigorously,
-and propose additions while keeping the ruleset MECE.
+and propose additions while keeping the ruleset MECE. `/deslop` owns cleanup of
+known slop in a branch; this scanner owns catalog evolution, not remediation.
 
 ## Phase 1: Read Current State
 
-1. Fetch the current RULES.md from https://raw.githubusercontent.com/pj-costello/slop-guard/main/RULES.md
-2. Fetch the current SOURCES.md from https://raw.githubusercontent.com/pj-costello/slop-guard/main/SOURCES.md
+1. Read local `RULES.md` and `SOURCES.md` from the current repo checkout.
+2. If either file is unavailable locally, fetch the fallback copies from:
+   - https://raw.githubusercontent.com/pj-costello/slop-guard/main/RULES.md
+   - https://raw.githubusercontent.com/pj-costello/slop-guard/main/SOURCES.md
 3. Count rules per category. Note these counts for the MECE audit later.
 
 ## Phase 2: Scan Curated Sources
@@ -53,12 +56,12 @@ and propose additions while keeping the ruleset MECE.
 - WebSearch `"AI code anti-pattern" OR "AI code slop" OR "LLM code quality" -site:reddit.com` (last 7 days)
 - WebSearch `"AI generated code" problems quality 2026`
 
-### Tier 3 — Quarterly deep reads
+### Tier 3 — Monthly deep reads
 
 Only run if today is within the first 7 days of the month.
 Check using Bash: `date +%d` and compare (01-07 = run).
 
-If monthly:
+When the monthly window is active:
 - WebSearch `site:arxiv.org AI generated code quality 2026`
 - WebFetch `https://www.qodo.ai/reports/state-of-ai-code-quality/`
 - WebSearch `site:fast.ai vibe coding OR AI code`
@@ -74,7 +77,7 @@ FREQUENCY: [single observation / multiple independent / research-backed]
 EXAMPLE:
   BAD: [concrete code snippet, 2-5 lines]
   GOOD: [concrete fix, 2-5 lines]
-CATEGORY: [Code Bloat | Scope Creep | Production Hygiene | Quality over Velocity | NEW: ___]
+CATEGORY: [Code Bloat | Error Handling & Observability | Scope Creep | Production Hygiene | Quality over Velocity | Context & Proof | NEW: ___]
 EXISTING OVERLAP: [which existing rule(s) it overlaps, or "none"]
 VERDICT: [ADD / MERGE with rule "X" / SKIP]
 RATIONALE: [why]
@@ -84,7 +87,7 @@ RATIONALE: [why]
 1. **Concrete** — describes a specific code pattern, not a vague complaint
 2. **Not duplicate** — not already covered by an existing rule in RULES.md
 3. **Has source** — links to a real, accessible URL
-4. **Has example** — includes a do/don't code snippet
+4. **Has example** — includes a do/don't code snippet or workflow artifact snippet
 5. **Reproducible** — observed by 2+ people OR well-documented by one credible source
 
 If a finding fails ANY criterion, set VERDICT to SKIP with the reason.
@@ -128,6 +131,7 @@ Read the full RULES.md (including any proposed additions from Phase 4) and produ
   - Performance (N+1 queries, unoptimized assets)
   - Testing (test quality, not just test location)
   - Documentation (over-documenting vs under-documenting)
+  - Context & Proof (source authority, requirement traceability, proof/claim mismatch, stale assumptions)
 - Flag gaps as "potential future categories" — don't create rules for them unless a source supports it.
 
 **Consolidation Opportunities:**
@@ -144,7 +148,7 @@ Produce this exact structure:
 - Sources checked: [N]
 - Findings before filtering: [N]
 - Proposals after filtering: [N ADD + N MERGE]
-- Tier 3 quarterly scan: [yes/no]
+- Tier 3 monthly scan: [yes/no]
 
 ## Proposals
 
@@ -168,9 +172,9 @@ Produce this exact structure:
 | r/ExperiencedDevs | 2 | searched | N |
 | Smithery.ai | 2 | searched | N |
 | General sweep | 2 | searched | N |
-| ArXiv | 3 | skipped (not quarterly) | - |
-| Qodo | 3 | skipped (not quarterly) | - |
-| fast.ai | 3 | skipped (not quarterly) | - |
+| ArXiv | 3 | skipped (not monthly window) | - |
+| Qodo | 3 | skipped (not monthly window) | - |
+| fast.ai | 3 | skipped (not monthly window) | - |
 ```
 
 ## Critical Constraints

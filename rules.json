@@ -1,0 +1,245 @@
+{
+  "schema_version": 1,
+  "rules": [
+    {
+      "id": "no-trivial-docstrings",
+      "title": "No docstrings on obvious functions",
+      "category": "Code Bloat",
+      "source": "Stack Overflow -- Code Smells for AI Agents",
+      "enforcement": "automated_warn",
+      "lint_checks": [
+        "check_trivial_docstrings"
+      ]
+    },
+    {
+      "id": "no-catch-log-reraise",
+      "title": "No try/except that only logs and re-raises",
+      "category": "Error Handling & Observability",
+      "source": "Medium -- Defensive Code, Dangerous Data",
+      "enforcement": "automated_warn",
+      "lint_checks": [
+        "check_catch_log_reraise"
+      ]
+    },
+    {
+      "id": "no-over-abstraction",
+      "title": "No over-abstraction",
+      "category": "Code Bloat",
+      "source": "Variant Systems -- 10 Anti-Patterns in AI-Generated Codebases",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "no-nonconfigurable-feature-flags",
+      "title": "No feature flags for non-configurable things",
+      "category": "Code Bloat",
+      "source": "Stack Overflow -- Code Smells for AI Agents",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "terse-functional-comments",
+      "title": "Terse functional comments only",
+      "category": "Code Bloat",
+      "source": "Stack Overflow -- Code Smells for AI Agents",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "no-speculative-logging",
+      "title": "No speculative logging",
+      "category": "Error Handling & Observability",
+      "source": "Medium -- Defensive Code, Dangerous Data",
+      "enforcement": "automated_warn",
+      "lint_checks": [
+        "check_speculative_logging"
+      ]
+    },
+    {
+      "id": "no-out-of-scope-edits",
+      "title": "Don't touch code outside the task scope",
+      "category": "Scope Creep",
+      "source": "Stack Overflow -- Code Smells for AI Agents",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "no-reintroduced-removed-code",
+      "title": "Don't re-introduce removed code",
+      "category": "Scope Creep",
+      "source": "Internal session observations",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "no-one-off-helper-files",
+      "title": "Don't create new files for one-off functions",
+      "category": "Scope Creep",
+      "source": "Variant Systems -- 10 Anti-Patterns in AI-Generated Codebases",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "loc-not-progress",
+      "title": "LOC is not a metric of progress",
+      "category": "Scope Creep",
+      "source": "Greptile -- AI Slopware",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "no-test-artifacts-production",
+      "title": "No test artifacts in production paths",
+      "category": "Production Hygiene",
+      "source": "Gregorein -- garryslist.org audit",
+      "enforcement": "automated_error",
+      "lint_checks": [
+        "check_test_files_outside_tests"
+      ]
+    },
+    {
+      "id": "no-kitchen-sink-dependencies",
+      "title": "No kitchen-sink dependencies",
+      "category": "Production Hygiene",
+      "source": "Gregorein -- garryslist.org audit",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "no-unoptimized-duplicate-assets",
+      "title": "No unoptimized or duplicate assets",
+      "category": "Production Hygiene",
+      "source": "Gregorein -- garryslist.org audit",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "no-dead-code-empty-files",
+      "title": "No dead code or empty files",
+      "category": "Production Hygiene",
+      "source": "Gregorein -- garryslist.org audit",
+      "enforcement": "automated_warn",
+      "lint_checks": [
+        "check_empty_files"
+      ]
+    },
+    {
+      "id": "no-empty-alt-meaningful-images",
+      "title": "No empty alt on meaningful images",
+      "category": "Production Hygiene",
+      "source": "Gregorein -- garryslist.org audit",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "no-duplicate-document-shell",
+      "title": "No duplicate document shell or main content in the DOM",
+      "category": "Production Hygiene",
+      "source": "Gregorein -- garryslist.org audit",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "no-silent-catches",
+      "title": "No silent catches without an intentional reason",
+      "category": "Error Handling & Observability",
+      "source": "Internal session observations",
+      "enforcement": "automated_error",
+      "lint_checks": [
+        "check_silent_catches"
+      ]
+    },
+    {
+      "id": "preserve-error-specificity",
+      "title": "Preserve error specificity",
+      "category": "Error Handling & Observability",
+      "source": "Internal session observations",
+      "enforcement": "automated_warn",
+      "lint_checks": [
+        "check_generic_error_messages"
+      ]
+    },
+    {
+      "id": "no-source-string-slicing",
+      "title": "Don't extract string content from Python source via string slicing",
+      "category": "Production Hygiene",
+      "source": "Internal session observations",
+      "enforcement": "automated_warn",
+      "lint_checks": [
+        "check_source_string_slicing"
+      ]
+    },
+    {
+      "id": "review-ai-diff-before-commit",
+      "title": "Review every AI-generated diff before committing",
+      "category": "Quality over Velocity",
+      "source": "Gregorein -- garryslist.org audit / Jose Casanova prompt",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "bundle-size-matters",
+      "title": "Bundle size matters",
+      "category": "Quality over Velocity",
+      "source": "Gregorein -- garryslist.org audit / Greptile -- AI Slopware",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "dont-ship-what-you-dont-understand",
+      "title": "Don't ship what you don't understand",
+      "category": "Quality over Velocity",
+      "source": "Gregorein -- garryslist.org audit",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "no-exact-ai-output-counts",
+      "title": "Don't assert exact counts of AI-generated items in tests",
+      "category": "Quality over Velocity",
+      "source": "Internal session observations",
+      "enforcement": "manual_review",
+      "lint_checks": []
+    },
+    {
+      "id": "no-orphan-diffs",
+      "title": "No orphan diffs",
+      "category": "Context & Proof",
+      "source": "Dhasan Dev -- software factory trap article",
+      "enforcement": "review_packet",
+      "lint_checks": []
+    },
+    {
+      "id": "match-proof-to-claim",
+      "title": "Match the proof to the claim",
+      "category": "Context & Proof",
+      "source": "Dhasan Dev -- software factory trap article",
+      "enforcement": "review_packet",
+      "lint_checks": []
+    },
+    {
+      "id": "scoped-authoritative-context",
+      "title": "Keep context bundles scoped and authoritative",
+      "category": "Context & Proof",
+      "source": "Dhasan Dev -- software factory trap article",
+      "enforcement": "review_packet",
+      "lint_checks": []
+    },
+    {
+      "id": "record-staleness-triggers",
+      "title": "Record staleness triggers",
+      "category": "Context & Proof",
+      "source": "Dhasan Dev -- software factory trap article",
+      "enforcement": "review_packet",
+      "lint_checks": []
+    },
+    {
+      "id": "escalate-frame-mismatches",
+      "title": "Escalate frame mismatches before coding",
+      "category": "Context & Proof",
+      "source": "Dhasan Dev -- software factory trap article",
+      "enforcement": "review_packet",
+      "lint_checks": []
+    }
+  ]
+}

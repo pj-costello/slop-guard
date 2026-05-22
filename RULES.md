@@ -22,24 +22,6 @@ def get_db():
     return _db
 ```
 
-### No try/except that only logs and re-raises
-
-Catching an exception just to log it and re-raise adds noise and defeats structured error handling. Let exceptions propagate to where they're actually handled.
-
-```python
-# BAD
-try:
-    result = store_review(data)
-except Exception as e:
-    logger.error(f"Failed to store review: {e}")
-    raise
-
-# GOOD
-result = store_review(data)
-```
-
-Exception: Use try/except when you need a specific fallback, need to translate the exception type, or need to add context the handler wouldn't have.
-
 ### No over-abstraction
 
 Don't create class hierarchies, strategy patterns, or factory methods for things that work as plain functions. Three similar lines of code is better than a premature abstraction.
@@ -60,7 +42,7 @@ def evaluate(error_type, fix_type, fix_proposal) -> dict:
 
 ### No feature flags for non-configurable things
 
-Only use env vars / config for values that genuinely differ between environments. If a feature is always on, it's just code.
+Only use env vars / config for values that genuinely differ between environments. If a feature is always on, it's just code. For risky experimental features, use the separate feature-flag preference in `PREFERENCES.md` and remove the flag after validation.
 
 ```python
 # BAD
@@ -84,6 +66,28 @@ Comments explain WHY, not WHAT. No section headers, no emoji, no `TODO: Consider
 # Map Python log levels to Cloud Logging severity
 ```
 
+---
+
+## Error Handling & Observability
+
+### No try/except that only logs and re-raises
+
+Catching an exception just to log it and re-raise adds noise and defeats structured error handling. Let exceptions propagate to where they're actually handled.
+
+```python
+# BAD
+try:
+    result = store_review(data)
+except Exception as e:
+    logger.error(f"Failed to store review: {e}")
+    raise
+
+# GOOD
+result = store_review(data)
+```
+
+Exception: Use try/except when you need a specific fallback, need to translate the exception type, or need to add context the handler wouldn't have.
+
 ### No speculative logging
 
 Log errors and state transitions. Don't log routine operations.
@@ -96,6 +100,36 @@ logger.info("Successfully stored review")
 
 # GOOD
 logger.error("review_store_failed", extra={"doc_id": doc_id, "error": str(e)})
+```
+
+### No silent catches without an intentional reason
+
+Do not swallow exceptions with `pass` or `...` unless the handler explains why the failure is safe to ignore. Use `# INTENTIONAL: <reason>` on the handler when silence is deliberate.
+
+```python
+# BAD
+try:
+    cleanup_temp_file(path)
+except FileNotFoundError:
+    pass
+
+# GOOD
+try:
+    cleanup_temp_file(path)
+except FileNotFoundError:  # INTENTIONAL: cleanup is idempotent; file may already be gone
+    pass
+```
+
+### Preserve error specificity
+
+Every error message should include concrete context: what was attempted, relevant IDs, the actual error. Generic messages defeat debugging.
+
+```python
+# BAD
+raise ValueError("Invalid input")
+
+# GOOD
+raise ValueError(f"Could not parse document {doc_id}: expected JSON, got {content_type}")
 ```
 
 ---
@@ -166,18 +200,6 @@ Ship one valid document outline: a single `head` with one title/meta set, and do
 
 *Origin: Gregorein audit found page content rendered twice in the DOM and duplicate head tags.*
 
-### Preserve error specificity
-
-Every error message should include concrete context: what was attempted, relevant IDs, the actual error. Generic messages defeat debugging.
-
-```python
-# BAD
-raise ValueError("Invalid input")
-
-# GOOD
-raise ValueError(f"Could not parse document {doc_id}: expected JSON, got {content_type}")
-```
-
 ### Don't extract string content from Python source via string slicing
 
 Reading a Python source file and slicing out a triple-quoted string produces raw Python source, not the interpreted value. Escape sequences like `\\u2713` and `\\n` appear as literals in the output instead of `✓` and newline.
@@ -188,9 +210,8 @@ with open("sidebar_page.py") as f:
     src = f.read()
 html = src.split('"""')[1]   # grabs literal \\u2713, \\n, etc.
 
-# GOOD — use Python to evaluate the value
-import ast, textwrap
-value = ast.literal_eval(src[src.index('"""'):].split('"""')[1].join(['"""', '"""']))
+# GOOD — import the value through Python, so escapes are interpreted
+from sidebar_page import HTML
 
 # BETTER — don't embed HTML in Python source at all; keep it in a .html file
 ```
@@ -229,3 +250,82 @@ assert len(review_cards) <= 100
 ```
 
 *Origin: Visual E2E test asserted exactly 28 review cards; user correction: "the agent may return different findings each time it runs since its non deterministic."*
+
+---
+
+## Context & Proof
+
+### No orphan diffs
+
+Every non-trivial AI-generated change must ship with a review packet that ties the diff back to the larger object behind it: requirement, authoritative sources, assumptions, implementation mapping, proof claims, and staleness triggers. A reviewer should not have to reconstruct why the code exists from the diff alone.
+
+```markdown
+# BAD
+Changed 7 files and added tests.
+
+# GOOD
+Requirement: R17 checkout should reject expired promo codes before payment intent creation.
+Sources: PRD v3 section 4.2; checkout_api.md#promo-validation.
+Assumptions: Promo expiration is evaluated in UTC.
+Implementation: `validate_promo` now runs before `create_payment_intent`.
+Proof: unit test for expired code; integration test verifies no payment intent is created.
+Stale if: PRD v3 section 4.2 or checkout API promo contract changes.
+```
+
+### Match the proof to the claim
+
+A passing check only proves the claim it actually exercises. Do not use backend unit tests to claim a user journey works, screenshots to claim durable state exists, or a 200 response to claim product intent is satisfied.
+
+```markdown
+# BAD
+Claim: Users can complete onboarding.
+Evidence: `POST /api/onboarding` returns 200.
+
+# GOOD
+Claim: Users can complete onboarding.
+Evidence: E2E creates an account, completes the onboarding screens, verifies persisted profile state, and confirms the next-session resume path.
+```
+
+### Keep context bundles scoped and authoritative
+
+More context is not automatically better. Before implementation, list the small set of admitted sources, mark which source wins on conflicts, and ignore stale or unauthoritative discussion unless it is promoted into the source set.
+
+```markdown
+# BAD
+Context used: repo search, old Slack thread, two planning docs, README, and traces.
+
+# GOOD
+Authoritative sources:
+1. Linear ENG-482 acceptance criteria (owns behavior)
+2. `docs/billing-contract.md` (owns API contract)
+3. `tests/billing/e2e.test.ts` (owns current proof surface)
+
+Ignored: 2025 Slack brainstorm; superseded by ENG-482.
+```
+
+### Record staleness triggers
+
+If the work depends on a requirement, contract, design decision, schema, or external behavior, record what would invalidate the result. When an admitted source changes materially, re-check the impacted work instead of patching around stale assumptions.
+
+```markdown
+# BAD
+Assumption: The webhook payload always includes `customer.email`.
+
+# GOOD
+Assumption: The webhook payload includes `customer.email` because Stripe event contract 2026-04 says it is required.
+Stale if: Stripe API version changes, webhook schema changes, or billing switches to customer IDs as the primary identity.
+```
+
+### Escalate frame mismatches before coding
+
+Do not write code when the requirement conflicts with an architecture boundary, ownership rule, product promise, or existing source of authority. Surface the mismatch and propose the smallest decision needed before implementing.
+
+```markdown
+# BAD
+Requirement says "sync invoices in the browser", so add Stripe secret-key calls to the frontend.
+
+# GOOD
+Escalation: Browser invoice sync conflicts with secret-key boundary. Need decision: move sync to backend job, or change requirement to client-safe invoice preview.
+```
+
+*Origin: Dhasan Dev article on the software factory trap: agents produce syntactically correct but semantically incomplete work when requirement context, source authority, proof obligations, and staleness are not encoded in the workflow.*

@@ -19,6 +19,26 @@ Not a framework — a set of patterns you can copy-paste and adapt.
 
 ---
 
+## Proof Claims
+
+Before writing tests for an AI-generated change, name the claim each test is meant
+to prove. A test is only valid evidence when it exercises the same layer as the
+claim.
+
+| Claim type | Matching evidence | Common false proof |
+|------------|-------------------|--------------------|
+| Function behavior | Unit test with representative inputs, edge cases, and failure modes | Snapshot that only checks output shape |
+| API contract | Contract or integration test that verifies status, schema, auth, and side effects | Handler unit test with mocked dependencies only |
+| Durable state | Write/read roundtrip against the real persistence layer or a faithful local equivalent | Screenshot, log line, or 200 response |
+| User journey | E2E flow through the UI/API path the user actually takes | Backend endpoint returning 200 |
+| Visual / UX outcome | Browser test, screenshot, accessibility tree, or human review for judgment-heavy UI | Passing API test |
+| Non-deterministic AI output | Invariant and sanity-bound assertions | Exact item count or verbatim text assertion |
+
+Copy the matching claims into the proof section of
+[REVIEW_PACKET_TEMPLATE.md](REVIEW_PACKET_TEMPLATE.md) for non-trivial changes.
+
+---
+
 ## Layer 1: Lint — Executable Guardrails
 
 Run before every deploy. Exit 1 blocks the pipeline.
@@ -268,19 +288,22 @@ artifacts with configurable retention.
 For pure functions with complex logic (text search, matching, scheduling).
 Use the project's native test framework (vitest, unittest, pytest).
 
-### Pattern: Dynamic import to avoid heavy dependencies
+### Pattern: Extract pure logic behind dependency-light imports
 
-If your function lives in a file with heavy imports (Flask, Supabase client),
-extract just the function body for testing without loading the framework.
+If a function lives in a file with heavy imports (Flask, Supabase client), move the
+pure logic into a small importable module instead of slicing source text or using
+`exec()`. Source slicing bypasses Python's normal parsing rules and conflicts with
+`RULES.md` guidance against extracting content from Python source strings.
 
 ```python
-# Load only the functions we need, not the whole module
-with open("api_endpoint.py") as f:
-    source = f.read()
-# Extract function definitions via exec()
-namespace = {}
-exec(source_subset, namespace)
-build_index_map = namespace["_build_full_text_and_index_map"]
+# endpoint.py -- framework boundary stays thin
+from review_logic import build_index_map
+
+# tests/test_review_logic.py -- import the pure function directly
+from review_logic import build_index_map
+
+def test_build_index_map():
+    assert build_index_map(["a", "b"]) == {"a": 0, "b": 1}
 ```
 
 ---
