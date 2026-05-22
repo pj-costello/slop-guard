@@ -1,12 +1,12 @@
 # slop-guard
 
-Anti-AI-slop rules, portable lint checks, decision preferences, lessons learned, review workflows, and a self-updating scanner.
+Anti-AI-slop rules, portable lint checks, decision preferences, lessons learned, review and cleanup workflows, and a self-updating scanner.
 
 ## What is AI slop?
 
 AI coding assistants produce predictable anti-patterns: over-abstraction, unnecessary comments, defensive over-engineering, kitchen-sink dependencies, test files shipped to production, scope creep into untouched files, and plausible diffs whose requirement context and proof claims are missing. Left unchecked, these patterns compound into bloated, fragile codebases and force reviewers to reconstruct intent from output alone.
 
-This repo provides eight things to fight it:
+This repo provides nine things to fight it:
 
 1. **[RULES.md](RULES.md)** -- Anti-slop rules with concrete do/don't examples, organized by category
 2. **[PREFERENCES.md](PREFERENCES.md)** -- Architectural decision defaults (DRY, flat structure, typed exceptions, etc.) with caveats for when not to apply them
@@ -16,6 +16,7 @@ This repo provides eight things to fight it:
 6. **[lint/slop_lint.py](lint/slop_lint.py)** -- Portable **Python** lint checks (stdlib only). [RULES.md](RULES.md) applies to any stack; the bundled linter is a small automated subset, not a full match to every rule.
 7. **[Scanner skill](.claude/skills/slop-scanner/)** -- A Claude Code skill that runs the slop-scanner process (phased scan, distillation, MECE audit). **Schedule in your own environment** (e.g. twice weekly Mon + Thu); the repo only ships the skill, not a cron.
 8. **[/thermo-nuclear-code-quality-review](.claude/commands/thermo-nuclear-code-quality-review.md)** -- A comprehensive review command for correctness, security, performance, operability, and maintainability.
+9. **[/deslop](.claude/commands/deslop.md)** -- A focused cleanup command for removing known AI slop from an existing branch, diff, or file set.
 
 ## MECE review system
 
@@ -25,10 +26,11 @@ Use the tools together, but keep their responsibilities separate:
 |-------|------|--------------|------------------|
 | Slop Guard rules | AI-specific anti-patterns and generated-code failure modes | Full codebase architecture review | `RULES.md`, `lint/slop_lint.py` |
 | Review packet | Requirement/source/proof/staleness traceability for a change | Finding new code-quality issues | `REVIEW_PACKET_TEMPLATE.md` |
-| Thermo-nuclear review | Comprehensive engineering review of a branch or diff | Maintaining the anti-slop rule catalog | `.claude/commands/thermo-nuclear-code-quality-review.md` |
-| Slop scanner | Discovering and proposing new anti-slop rules from sources | Reviewing a specific PR's correctness | `.claude/skills/slop-scanner/` |
+| Thermo-nuclear review | Comprehensive engineering review of a branch or diff | Maintaining the anti-slop rule catalog or performing cleanup | `.claude/commands/thermo-nuclear-code-quality-review.md` |
+| Deslop | Focused cleanup/remediation of known slop in an existing change | Discovering new rules or broad architecture review | `.claude/commands/deslop.md` |
+| Slop scanner | Discovering and proposing new anti-slop rules from sources | Reviewing a specific PR's correctness or cleaning a branch | `.claude/skills/slop-scanner/` |
 
-This keeps the system MECE: slop guard prevents known AI slop, the review packet preserves context and proof, thermo-nuclear review audits the actual change, and the scanner evolves the rule catalog.
+This keeps the system MECE: slop guard defines known AI slop, the review packet preserves context and proof, thermo-nuclear review audits the actual change, `/deslop` remediates known slop, and the scanner evolves the rule catalog.
 
 ## How it stays current
 
@@ -105,6 +107,10 @@ The bundled linter intentionally covers only portable, low-false-positive checks
 ### Use the scanner
 
 If you use Claude Code, the `/slop-scanner` skill searches curated sources for new AI code criticism and proposes additions to RULES.md.
+
+### Use /deslop
+
+Use [`/deslop`](.claude/commands/deslop.md) when a branch or diff already contains known AI slop and needs focused cleanup against `RULES.md`. It should remove or simplify existing slop; it should not discover new rules or perform a full thermo-nuclear review.
 
 ### Use the review packet
 

@@ -12,7 +12,8 @@ description: >
 
 You maintain the slop-guard repo's living catalog of AI code anti-patterns.
 Your job: find new patterns from curated sources, distill them rigorously,
-and propose additions while keeping the ruleset MECE.
+and propose additions while keeping the ruleset MECE. `/deslop` owns cleanup of
+known slop in a branch; this scanner owns catalog evolution, not remediation.
 
 ## Phase 1: Read Current State
 

@@ -12,11 +12,13 @@ catalog or scanner.
   specific change.
 - **Thermo-nuclear review owns:** whether the change is correct, safe, maintainable,
   operable, and fit for the product and architecture.
+- **/deslop owns:** focused remediation of known slop after it has been identified.
 - **Slop scanner owns:** proposing new anti-slop rules from external or internal
   evidence.
 
-If a finding is a recurring AI-slop pattern, report it in the thermo-nuclear review
-and separately propose a Slop Guard rule through the scanner workflow.
+If a finding is known slop, report it and recommend `/deslop` for remediation. If
+it is a recurring AI-slop pattern not covered by existing rules, separately propose
+a Slop Guard rule through the scanner workflow.
 
 ## Review protocol
 
