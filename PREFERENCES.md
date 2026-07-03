@@ -6,7 +6,7 @@ that guide decisions when there's a genuine choice.
 
 Reference this file in your project's `CLAUDE.md` or equivalent:
 ```markdown
-**Decision preferences**: See https://github.com/pj-costello/slop-guard/blob/main/PREFERENCES.md
+**Decision preferences**: See https://github.com/trisouro/slop-guard/blob/main/PREFERENCES.md
 ```
 
 Override any preference in your project's own rules when the context demands it.

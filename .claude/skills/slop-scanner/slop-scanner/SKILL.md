@@ -19,8 +19,8 @@ known slop in a branch; this scanner owns catalog evolution, not remediation.
 
 1. Read local `RULES.md` and `SOURCES.md` from the current repo checkout.
 2. If either file is unavailable locally, fetch the fallback copies from:
-   - https://raw.githubusercontent.com/pj-costello/slop-guard/main/RULES.md
-   - https://raw.githubusercontent.com/pj-costello/slop-guard/main/SOURCES.md
+   - https://raw.githubusercontent.com/trisouro/slop-guard/main/RULES.md
+   - https://raw.githubusercontent.com/trisouro/slop-guard/main/SOURCES.md
 3. Count rules per category. Note these counts for the MECE audit later.
 
 ## Phase 2: Scan Curated Sources

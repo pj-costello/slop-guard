@@ -55,7 +55,7 @@ See [SOURCES.md](SOURCES.md) for the full watchlist, provenance for every rule, 
 
 ## Reproducible / pinned consumption
 
-- **Slop-lint and rules in CI:** Point raw URLs at a **tag** or **commit SHA** instead of `main` when you need stable behavior across environments, e.g. `https://raw.githubusercontent.com/pj-costello/slop-guard/v0.1.0/lint/slop_lint.py` after you [create a release](https://github.com/pj-costello/slop-guard/releases) on the commit you want.
+- **Slop-lint and rules in CI:** Point raw URLs at a **tag** or **commit SHA** instead of `main` when you need stable behavior across environments, e.g. `https://raw.githubusercontent.com/trisouro/slop-guard/v0.1.0/lint/slop_lint.py` after you [create a release](https://github.com/trisouro/slop-guard/releases) on the commit you want.
 - **Loose / always current:** The examples below use `main` to track the latest rules and lint.
 
 ## Quick start
@@ -65,8 +65,8 @@ See [SOURCES.md](SOURCES.md) for the full watchlist, provenance for every rule, 
 Reference `RULES.md` in your project's `CLAUDE.md`, `.cursorrules`, or equivalent AI assistant config:
 
 ```markdown
-**Anti-slop rules**: See https://github.com/pj-costello/slop-guard/blob/main/RULES.md
-**Decision preferences**: See https://github.com/pj-costello/slop-guard/blob/main/PREFERENCES.md
+**Anti-slop rules**: See https://github.com/trisouro/slop-guard/blob/main/RULES.md
+**Decision preferences**: See https://github.com/trisouro/slop-guard/blob/main/PREFERENCES.md
 ```
 
 ### Validate the rule index
@@ -137,7 +137,7 @@ For projects that want to always run the latest checks without manual updates:
 
 ```python
 import importlib, tempfile, urllib.request, os
-SLOP_URL = "https://raw.githubusercontent.com/pj-costello/slop-guard/main/lint/slop_lint.py"
+SLOP_URL = "https://raw.githubusercontent.com/trisouro/slop-guard/main/lint/slop_lint.py"
 try:
     with urllib.request.urlopen(SLOP_URL, timeout=10) as r:
         code = r.read()
